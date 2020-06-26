@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/patrlind/verbump/pkg/verbump"
@@ -13,7 +14,7 @@ func main() {
 	var version, fn, outFn string
 	var major, minor, patch int
 	var print bool
-	flag.StringVar(&version, "version", "", "use version string (ignore -in)")
+	flag.StringVar(&version, "version", "", "use version string")
 	flag.StringVar(&fn, "in", "", "read version from file (-- for stdin))")
 	flag.StringVar(&outFn, "out", "", "write version to file (-- for stdout))")
 	flag.IntVar(&major, "major", 0, "major version increment")
@@ -78,7 +79,7 @@ func readVersion(fn string) (string, error) {
 	defer f.Close()
 	r := bufio.NewReader(f)
 	ver, err := r.ReadString('\n')
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return "", err
 	}
 	_, err = r.ReadString('\n')
