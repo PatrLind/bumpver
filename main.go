@@ -69,7 +69,7 @@ func main() {
 		v.Minor = setMinor.value
 	}
 	if setPatch.set {
-		v.Major = setPatch.value
+		v.Patch = setPatch.value
 	}
 	if setPreRelease.set {
 		v.PreRelease = setPreRelease.value
