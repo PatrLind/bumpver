@@ -13,13 +13,20 @@ import (
 func main() {
 	var version, fn, outFn string
 	var major, minor, patch int
+	var setMajor, setMinor, setPatch intFlag
 	var print bool
+	var setPreRelease, setBuild stringFlag
 	flag.StringVar(&version, "version", "", "use version string")
 	flag.StringVar(&fn, "in", "", "read version from file (-- for stdin))")
 	flag.StringVar(&outFn, "out", "", "write version to file (-- for stdout))")
 	flag.IntVar(&major, "major", 0, "major version increment")
 	flag.IntVar(&minor, "minor", 0, "minor version increment")
 	flag.IntVar(&patch, "patch", 0, "patch version increment")
+	flag.Var(&setMajor, "set-major", "set major version to number")
+	flag.Var(&setMinor, "set-minor", "set minor version to number")
+	flag.Var(&setPatch, "set-patch", "set patch version to number")
+	flag.Var(&setPreRelease, "set-pre-release", "set pre release string")
+	flag.Var(&setBuild, "set-build", "set build string")
 	flag.BoolVar(&print, "print", false, "print resulting version when done")
 	flag.Parse()
 
@@ -50,8 +57,34 @@ func main() {
 		os.Exit(1)
 	}
 
+	v, err := verbump.Parse(ver)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing version: %v\n", err)
+		os.Exit(1)
+	}
+	if setMajor.set {
+		v.Major = setMajor.value
+	}
+	if setMinor.set {
+		v.Minor = setMinor.value
+	}
+	if setPatch.set {
+		v.Major = setPatch.value
+	}
+	if setPreRelease.set {
+		v.PreRelease = setPreRelease.value
+	}
+	if setBuild.set {
+		v.Build = setBuild.value
+	}
+	err = v.Validate()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Validation error: %v\n", err)
+		os.Exit(1)
+	}
+
 	if outFn != "" {
-		err = writeVersion(outFn, ver)
+		err = writeVersion(outFn, v.String())
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing version: %v\n", err)
 			os.Exit(1)
@@ -59,7 +92,7 @@ func main() {
 	}
 
 	if print {
-		fmt.Fprintln(os.Stdout, ver)
+		fmt.Fprintln(os.Stdout, v.String())
 	}
 }
 
